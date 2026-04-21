@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Викторина по меню</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .stats-bar {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            color: white;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        .category-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .question {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option {
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 15px;
+            text-align: left;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .option.correct {
+            border-color: #4caf50;
+            background: #4caf50;
+            color: white;
+        }
+
+        .option.wrong {
+            border-color: #f44336;
+            background: #f44336;
+            color: white;
+        }
+
+        .option.disabled {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .result-card {
+            text-align: center;
+        }
+
+        .result-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        .result-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .result-score {
+            font-size: 48px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .result-message {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .dish-info {
+            background: #f8f9ff;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .dish-info h4 {
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .dish-info p {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .streak {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ff9800;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            animation: pulse 1s ease infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .feedback {
+            text-align: center;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+
+        .feedback.correct {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .feedback.wrong {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .mode-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .mode-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+
+        .mode-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .mode-card.selected {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .mode-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .mode-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .mode-desc {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .category-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .category-chip {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid transparent;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .category-chip:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .category-chip.selected {
+            background: white;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍽️ Викторина по меню</h1>
+            <p>Проверь свои знания о блюдах!</p>
+        </div>
+
+        <!-- Стартовый экран -->
+        <div id="start-screen" class="card">
+            <h3 style="margin-bottom: 15px;">Выберите режим игры:</h3>
+            <div class="mode-selector">
+                <div class="mode-card selected" data-mode="classic">
+                    <div class="mode-icon">🎯</div>
+                    <div class="mode-title">Классика</div>
+                    <div class="mode-desc">10 случайных вопросов</div>
+                </div>
+                <div class="mode-card" data-mode="endless">
+                    <div class="mode-icon">♾️</div>
+                    <div class="mode-title">Бесконечный</div>
+                    <div class="mode-desc">Играй без ограничений</div>
+                </div>
+            </div>
+
+            <h3 style="margin: 20px 0 15px;">Категория (опционально):</h3>
+            <div class="category-selector" id="category-selector">
+                <div class="category-chip selected" data-category="all">Все</div>
+            </div>
+
+            <button class="btn btn-primary" onclick="startGame()">Начать игру</button>
+        </div>
+
+        <!-- Экран игры -->
+        <div id="game-screen" class="hidden">
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-value" id="score">0</div>
+                    <div class="stat-label">Очки</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="question-num">1/10</div>
+                    <div class="stat-label">Вопрос</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="streak-count">0</div>
+                    <div class="stat-label">Серия</div>
+                </div>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress" style="width: 0%"></div>
+            </div>
+
+            <div class="card">
+                <span class="category-badge" id="category-badge">Категория</span>
+                <div class="question" id="question-text">Текст вопроса</div>
+                <div class="options" id="options-container"></div>
+                <div id="feedback" class="feedback hidden"></div>
+                <div class="dish-info hidden" id="dish-info">
+                    <h4 id="dish-name">Название блюда</h4>
+                    <p id="dish-description">Описание блюда</p>
+                </div>
+                <button class="btn btn-primary hidden" id="next-btn" onclick="nextQuestion()">Следующий вопрос</button>
+            </div>
+        </div>
+
+        <!-- Экран результатов -->
+        <div id="result-screen" class="card result-card hidden">
+            <div class="result-icon" id="result-icon">🏆</div>
+            <div class="result-title">Игра окончена!</div>
+            <div class="result-score" id="final-score">8/10</div>
+            <div class="result-message" id="result-message">Отличный результат!</div>
+            <div class="stats-bar" style="margin-top: 20px;">
+                <div class="stat-item">
+                    <div class="stat-value" id="correct-count">0</div>
+                    <div class="stat-label">Правильно</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="wrong-count">0</div>
+                    <div class="stat-label">Ошибки</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="best-streak">0</div>
+                    <div class="stat-label">Лучшая серия</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="restartGame()">Играть снова</button>
+            <button class="btn btn-secondary" onclick="showStartScreen()" style="margin-top: 10px;">В меню</button>
+        </div>
+    </div>
+
+    <script>
+        // Инициализация Telegram Web App
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        // Данные из меню (в реальном приложении загружаются с сервера)
+        const MENU_DATA = {
+            categories: {
+                "закуски_и_салаты": "🥗 Закуски и салаты",
+                "супы": "🍲 Супы",
+                "основные_блюда": "🍖 Основные блюда",
+                "хинкали": "🥟 Хинкали",
+                "соусы": "🥫 Соусы",
+                "мучное": "🥐 Мучное",
+                "сладкое": "🍰 Сладкое",
+                "напитки": "🥤 Напитки"
+            },
+            questions: [
+                {"dish_id": 1, "dish_name": "Бадриджани", "category": "закуски_и_салаты", "question": "Что является основным ингредиентом бадриджани?", "options": ["Баклажаны", "Кабачки", "Помидоры", "Перец"], "correct": 0},
+                {"dish_id": 1, "dish_name": "Бадриджани", "category": "закуски_и_салаты", "question": "С каким соусом подаются рулеты из баклажанов?", "options": ["Сацебели", "Баже (ореховый)", "Аджика", "Мацони"], "correct": 1},
+                {"dish_id": 2, "dish_name": "Жареный адыгейский сыр", "category": "закуски_и_салаты", "question": "С каким соусом подаётся жареный адыгейский сыр?", "options": ["Наршараб", "Сацебели", "Мацони", "Аджика"], "correct": 0},
+                {"dish_id": 3, "dish_name": "Овощной салат по-тбилисски", "category": "закуски_и_салаты", "question": "Какой город указан в названии салата?", "options": ["Тбилиси", "Батуми", "Кутаиси", "Мцхета"], "correct": 0},
+                {"dish_id": 4, "dish_name": "Грузинский салат с говядиной", "category": "закуски_и_салаты", "question": "Какое мясо используется в грузинском салате?", "options": ["Говядина", "Свинина", "Курица", "Баранина"], "correct": 0},
+                {"dish_id": 5, "dish_name": "Аджапсандали", "category": "закуски_и_салаты", "question": "Аджапсандали — это блюдо из чего?", "options": ["Овощей", "Мяса", "Рыбы", "Теста"], "correct": 0},
+                {"dish_id": 6, "dish_name": "Винегрет с ореховой заправкой", "category": "закуски_и_салаты", "question": "Какая заправка используется в винегрете?", "options": ["Ореховая", "Сметанная", "Масляная", "Лимонная"], "correct": 0},
+                {"dish_id": 7, "dish_name": "Харчо с говядиной", "category": "супы", "question": "Какое мясо используется в харчо?", "options": ["Говядина", "Свинина", "Курица", "Баранина"], "correct": 0},
+                {"dish_id": 7, "dish_name": "Харчо с говядиной", "category": "супы", "question": "Какая крупа добавляется в харчо?", "options": ["Рис", "Гречка", "Перловка", "Пшено"], "correct": 0},
+                {"dish_id": 8, "dish_name": "Крем-суп чкмерули", "category": "супы", "question": "Какой вкус у супа чкмерули?", "options": ["Сливочно-чесночный", "Острый", "Кислый", "Сладкий"], "correct": 0},
+                {"dish_id": 9, "dish_name": "Чихиртма с курицей", "category": "супы", "question": "Что добавляется в чихиртму для загущения?", "options": ["Яйцо", "Мука", "Крахмал", "Сметана"], "correct": 0},
+                {"dish_id": 10, "dish_name": "Грибная юшка", "category": "супы", "question": "Какие грибы используются в юшке?", "options": ["Шампиньоны и вешенки", "Белые и подберёзовики", "Лисички и опята", "Маслята и сыроежки"], "correct": 0},
+                {"dish_id": 11, "dish_name": "Лобио с беконом", "category": "основные_блюда", "question": "Что является основой лобио?", "options": ["Красная фасоль", "Белая фасоль", "Горох", "Чечевица"], "correct": 0},
+                {"dish_id": 12, "dish_name": "Долма", "category": "основные_блюда", "question": "Во что заворачивается фарш в долме?", "options": ["Виноградные листья", "Капустные листья", "Лаваш", "Тесто"], "correct": 0},
+                {"dish_id": 13, "dish_name": "Плов с говядиной", "category": "основные_блюда", "question": "Какой рис используется в плове?", "options": ["Рассыпчатый длиннозерный", "Круглозерный", "Пропаренный", "Жасмин"], "correct": 0},
+                {"dish_id": 14, "dish_name": "Лагман с говядиной", "category": "основные_блюда", "question": "Что является основой лагмана?", "options": ["Лапша с мясом и овощами", "Рис с мясом", "Картофель с мясом", "Только мясо"], "correct": 0},
+                {"dish_id": 15, "dish_name": "Чахохбили из курицы", "category": "основные_блюда", "question": "В каком соусе тушится курица в чахохбили?", "options": ["Томатном", "Сливочном", "Соевом", "Горчичном"], "correct": 0},
+                {"dish_id": 16, "dish_name": "Оджахури со свининой", "category": "основные_блюда", "question": "Что означает 'оджахури' в переводе?", "options": ["Семейный", "Праздничный", "Острый", "Быстрый"], "correct": 0},
+                {"dish_id": 17, "dish_name": "Хинкали свинина-говядина", "category": "хинкали", "question": "Сколько граммов весит один хинкали?", "options": ["75 грамм", "50 грамм", "100 грамм", "120 грамм"], "correct": 0},
+                {"dish_id": 17, "dish_name": "Хинкали свинина-говядина", "category": "хинкали", "question": "Что находится внутри хинкали помимо фарша?", "options": ["Ароматный бульон", "Только мясо", "Овощи", "Сыр"], "correct": 0},
+                {"dish_id": 18, "dish_name": "Хинкали баранина", "category": "хинкали", "question": "Какое мясо в хинкали 'баранина с зеленью'?", "options": ["Баранина", "Говядина", "Свинина", "Курица"], "correct": 0},
+                {"dish_id": 19, "dish_name": "Хинкали Три сыра", "category": "хинкали", "question": "Сколько видов сыра в хинкали 'Три сыра'?", "options": ["Три", "Два", "Четыре", "Один"], "correct": 0},
+                {"dish_id": 20, "dish_name": "Хинкали Грибы", "category": "хинкали", "question": "Какие грибы используются в хинкали?", "options": ["Шампиньоны", "Белые грибы", "Вешенки", "Лисички"], "correct": 0},
+                {"dish_id": 21, "dish_name": "Хинкали Вишня и творог", "category": "хинкали", "question": "Какие хинкали являются сладкими?", "options": ["Вишня и творог", "Свинина-говядина", "Три сыра", "Грибы"], "correct": 0},
+                {"dish_id": 22, "dish_name": "Мини-хинкали с курицей", "category": "хинкали", "question": "Сколько мини-хинкали в порции?", "options": ["10 штук", "5 штук", "15 штук", "20 штук"], "correct": 0},
+                {"dish_id": 23, "dish_name": "Мацони", "category": "соусы", "question": "Мацони — это какой соус?", "options": ["Кисломолочный", "Томатный", "Острый", "Сладкий"], "correct": 0},
+                {"dish_id": 24, "dish_name": "Аджика", "category": "соусы", "question": "Какая аджика по вкусу?", "options": ["Острая", "Сладкая", "Кислая", "Пресная"], "correct": 0},
+                {"dish_id": 25, "dish_name": "Сацебели", "category": "соусы", "question": "Сацебели — это соус на основе чего?", "options": ["Томатов", "Сметаны", "Орехов", "Масла"], "correct": 0},
+                {"dish_id": 25, "dish_name": "Сацебели", "category": "соусы", "question": "Какая зелень добавляется в сацебели?", "options": ["Кинза", "Петрушка", "Укроп", "Базилик"], "correct": 0},
+                {"dish_id": 26, "dish_name": "Фирменный соус", "category": "соусы", "question": "Что является основой фирменного соуса?", "options": ["Болгарский перец", "Помидоры", "Огурцы", "Баклажаны"], "correct": 0},
+                {"dish_id": 27, "dish_name": "Хачапури по-имеретински", "category": "мучное", "question": "Из какого теста готовится хачапури?", "options": ["Дрожжевого", "Слоёного", "Песочного", "Бездрожжевого"], "correct": 0},
+                {"dish_id": 28, "dish_name": "Хачапури по-мегрельски", "category": "мучное", "question": "Чем отличается хачапури по-мегрельски?", "options": ["Сыр внутри и сверху", "Только сыр внутри", "Только сыр сверху", "Без сыра"], "correct": 0},
+                {"dish_id": 29, "dish_name": "Хачапури по-аджарски", "category": "мучное", "question": "Какую форму имеет хачапури по-аджарски?", "options": ["Лодочка", "Круг", "Квадрат", "Треугольник"], "correct": 0},
+                {"dish_id": 30, "dish_name": "Хлебные палочки с сулугуни", "category": "мучное", "question": "С каким сыром готовятся хлебные палочки?", "options": ["Сулугуни", "Адыгейский", "Моцарелла", "Чеддер"], "correct": 0},
+                {"dish_id": 31, "dish_name": "Мини-самса с бараниной", "category": "мучное", "question": "Сколько штук мини-самсы в порции?", "options": ["5 штук", "3 штуки", "10 штук", "7 штук"], "correct": 0},
+                {"dish_id": 32, "dish_name": "Хачапури Карбонара", "category": "мучное", "question": "Хачапури Карбонара сочетает в себе кухню какой страны?", "options": ["Грузию и Италию", "Грузию и Францию", "Грузию и Испанию", "Грузию и Грецию"], "correct": 0},
+                {"dish_id": 33, "dish_name": "Сливочное хинкали с шоколадом", "category": "сладкое", "question": "Сливочное хинкали — это какое блюдо?", "options": ["Десерт", "Основное блюдо", "Закуска", "Суп"], "correct": 0},
+                {"dish_id": 34, "dish_name": "Орешки со сгущёнкой", "category": "сладкое", "question": "Сколько орешков в порции?", "options": ["5 штук", "3 штуки", "10 штук", "7 штук"], "correct": 0},
+                {"dish_id": 35, "dish_name": "Пахлава-чизкейк", "category": "сладкое", "question": "Пахлава-чизкейк сочетает в себе какие десерты?", "options": ["Пахлаву и чизкейк", "Пахлаву и тирамису", "Пахлаву и брауни", "Пахлаву и кекс"], "correct": 0},
+                {"dish_id": 36, "dish_name": "Морковный пирог", "category": "сладкое", "question": "Что является основным ингредиентом морковного пирога?", "options": ["Морковь", "Тыква", "Кабачок", "Свекла"], "correct": 0},
+                {"dish_id": 37, "dish_name": "Мацони с мёдом и орехами", "category": "напитки", "question": "Мацони с мёдом — это какой напиток?", "options": ["Кисломолочный", "Газированный", "Алкогольный", "Чай"], "correct": 0}
+            ]
+        };
+
+        // Состояние игры
+        let gameState = {
+            mode: 'classic',
+            category: 'all',
+            questions: [],
+            currentIndex: 0,
+            score: 0,
+            correct: 0,
+            wrong: 0,
+            streak: 0,
+            bestStreak: 0,
+            answered: false
+        };
+
+        // Инициализация категорий
+        function initCategories() {
+            const container = document.getElementById('category-selector');
+            for (const [key, value] of Object.entries(MENU_DATA.categories)) {
+                const chip = document.createElement('div');
+                chip.className = 'category-chip';
+                chip.dataset.category = key;
+                chip.textContent = value;
+                chip.onclick = () => selectCategory(chip);
+                container.appendChild(chip);
+            }
+        }
+
+        function selectCategory(element) {
+            document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('selected'));
+            element.classList.add('selected');
+            gameState.category = element.dataset.category;
+        }
+
+        function selectMode(element) {
+            document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+            element.classList.add('selected');
+            gameState.mode = element.dataset.mode;
+        }
+
+        // Обработчики выбора режима
+        document.querySelectorAll('.mode-card').forEach(card => {
+            card.onclick = () => selectMode(card);
+        });
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function startGame() {
+            // Фильтрация вопросов по категории
+            let questions = MENU_DATA.questions;
+            if (gameState.category !== 'all') {
+                questions = questions.filter(q => q.category === gameState.category);
+            }
+            
+            // Перемешиваем и выбираем вопросы
+            questions = shuffleArray(questions);
+            if (gameState.mode === 'classic') {
+                questions = questions.slice(0, 10);
+            }
+
+            if (questions.length === 0) {
+                alert('Нет вопросов в выбранной категории!');
+                return;
+            }
+
+            gameState.questions = questions;
+            gameState.currentIndex = 0;
+            gameState.score = 0;
+            gameState.correct = 0;
+            gameState.wrong = 0;
+            gameState.streak = 0;
+            gameState.bestStreak = 0;
+            gameState.answered = false;
+
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const q = gameState.questions[gameState.currentIndex];
+            const total = gameState.questions.length;
+
+            // Обновляем статистику
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('question-num').textContent = `${gameState.currentIndex + 1}/${total}`;
+            document.getElementById('streak-count').textContent = gameState.streak;
+            document.getElementById('progress').style.width = `${((gameState.currentIndex) / total) * 100}%`;
+
+            // Категория
+            const categoryBadge = document.getElementById('category-badge');
+            categoryBadge.textContent = MENU_DATA.categories[q.category] || q.category;
+
+            // Вопрос
+            document.getElementById('question-text').textContent = q.question;
+
+            // Варианты ответов
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            q.options.forEach((option, index) => {
+                const div = document.createElement('div');
+                div.className = 'option';
+                div.textContent = option;
+                div.onclick = () => selectAnswer(index, div);
+                optionsContainer.appendChild(div);
+            });
+
+            // Скрываем фидбек и инфо
+            document.getElementById('feedback').classList.add('hidden');
+            document.getElementById('dish-info').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+
+            gameState.answered = false;
+        }
+
+        function selectAnswer(index, element) {
+            if (gameState.answered) return;
+            gameState.answered = true;
+
+            const q = gameState.questions[gameState.currentIndex];
+            const options = document.querySelectorAll('.option');
+
+            // Показываем правильный/неправильный ответ
+            options.forEach((opt, i) => {
+                opt.classList.add('disabled');
+                if (i === q.correct) {
+                    opt.classList.add('correct');
+                } else if (i === index && index !== q.correct) {
+                    opt.classList.add('wrong');
+                }
+            });
+
+            // Обновляем счёт
+            const feedback = document.getElementById('feedback');
+            feedback.classList.remove('hidden', 'correct', 'wrong');
+
+            if (index === q.correct) {
+                gameState.score += 10 + gameState.streak * 2;
+                gameState.correct++;
+                gameState.streak++;
+                if (gameState.streak > gameState.bestStreak) {
+                    gameState.bestStreak = gameState.streak;
+                }
+                feedback.textContent = '✅ Правильно!';
+                feedback.classList.add('correct');
+                tg.HapticFeedback.notificationOccurred('success');
+            } else {
+                gameState.wrong++;
+                gameState.streak = 0;
+                feedback.textContent = '❌ Неправильно!';
+                feedback.classList.add('wrong');
+                tg.HapticFeedback.notificationOccurred('error');
+            }
+
+            // Показываем информацию о блюде
+            const dishInfo = document.getElementById('dish-info');
+            dishInfo.classList.remove('hidden');
+            document.getElementById('dish-name').textContent = q.dish_name;
+            document.getElementById('dish-description').textContent = MENU_DATA.categories[q.category];
+
+            // Показываем кнопку "Далее"
+            document.getElementById('next-btn').classList.remove('hidden');
+
+            // Обновляем статистику
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('streak-count').textContent = gameState.streak;
+        }
+
+        function nextQuestion() {
+            gameState.currentIndex++;
+
+            if (gameState.currentIndex >= gameState.questions.length) {
+                showResults();
+            } else {
+                showQuestion();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+
+            const total = gameState.questions.length;
+            const score = gameState.correct;
+            const percentage = (score / total) * 100;
+
+            document.getElementById('final-score').textContent = `${score}/${total}`;
+            document.getElementById('correct-count').textContent = gameState.correct;
+            document.getElementById('wrong-count').textContent = gameState.wrong;
+            document.getElementById('best-streak').textContent = gameState.bestStreak;
+
+            // Иконка и сообщение в зависимости от результата
+            const icon = document.getElementById('result-icon');
+            const message = document.getElementById('result-message');
+
+            if (percentage === 100) {
+                icon.textContent = '🏆';
+                message.textContent = 'Идеально! Вы эксперт меню!';
+            } else if (percentage >= 80) {
+                icon.textContent = '🌟';
+                message.textContent = 'Отличный результат!';
+            } else if (percentage >= 60) {
+                icon.textContent = '👍';
+                message.textContent = 'Хорошо, но можно лучше!';
+            } else if (percentage >= 40) {
+                icon.textContent = '📚';
+                message.textContent = 'Стоит ещё изучить меню!';
+            } else {
+                icon.textContent = '🍽️';
+                message.textContent = 'Приходите пробовать блюда!';
+            }
+
+            // Сохраняем результат в Telegram
+            tg.sendData(JSON.stringify({
+                score: gameState.score,
+                correct: gameState.correct,
+                total: total,
+                bestStreak: gameState.bestStreak
+            }));
+        }
+
+        function restartGame() {
+            startGame();
+        }
+
+        function showStartScreen() {
+            document.getElementById('start-screen').classList.remove('hidden');
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+        }
+
+        // Инициализация
+        initCategories();
+
+        // Обработка данных от бота
+        tg.onEvent('mainButtonClicked', () => {
+            restartGame();
+        });
+    </script>
+</body>
+</html>
