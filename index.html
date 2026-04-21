@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+р<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -136,13 +136,22 @@
             font-size: 13px;
             font-weight: 600;
             transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
+            position: relative;
+            z-index: 1;
         }
+        .category-chip:active { transform: scale(0.95); }
         .category-chip:hover { background: #ffffff; transform: translateY(-2px); }
         .category-chip.selected {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #ffffff;
             border-color: #ffffff;
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            z-index: 2;
         }
         .loading { text-align: center; color: white; padding: 40px; }
         .loading-spinner {
@@ -273,8 +282,14 @@
                 chip.className = 'category-chip';
                 chip.dataset.category = key;
                 chip.textContent = value;
-                chip.onclick = () => selectCategory(chip);
+                chip.addEventListener('click', function() { selectCategory(this); });
                 container.appendChild(chip);
+            }
+            
+            // Добавляем обработчик для кнопки "Все блюда"
+            const allDishesBtn = document.querySelector('.category-chip[data-category="все"]');
+            if (allDishesBtn) {
+                allDishesBtn.addEventListener('click', function() { selectCategory(allDishesBtn); });
             }
         }
 
@@ -431,12 +446,6 @@
             initCategories();
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('start-screen').classList.remove('hidden');
-            
-            // Добавляем обработчик для кнопки "Все блюда"
-            const allDishesBtn = document.querySelector('.category-chip[data-category="все"]');
-            if (allDishesBtn) {
-                allDishesBtn.onclick = () => selectCategory(allDishesBtn);
-            }
         };
     </script>
 </body>
