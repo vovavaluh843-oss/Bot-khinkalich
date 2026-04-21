@@ -129,22 +129,20 @@
         .category-chip {
             padding: 8px 16px;
             border-radius: 20px;
-            background: rgba(255,255,255,0.3);
-            color: #fff;
-            border: 2px solid rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.95);
+            color: #667eea;
+            border: 2px solid rgba(255,255,255,0.8);
             cursor: pointer;
             font-size: 13px;
             font-weight: 600;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
             transition: all 0.3s ease;
         }
-        .category-chip:hover { background: rgba(255,255,255,0.5); transform: translateY(-2px); }
+        .category-chip:hover { background: #ffffff; transform: translateY(-2px); }
         .category-chip.selected {
-            background: #ffffff;
-            color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
             border-color: #ffffff;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            text-shadow: none;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
         .loading { text-align: center; color: white; padding: 40px; }
         .loading-spinner {
@@ -187,7 +185,7 @@
             </div>
             <h3 style="margin: 20px 0 15px;">Категория (опционально):</h3>
             <div class="category-selector" id="category-selector">
-                <div class="category-chip selected" data-category="all">🍽 Все блюда</div>
+                <div class="category-chip selected" data-category="все">🍽 Все блюда</div>
             </div>
             <button class="btn btn-primary" onclick="startGame()">Начать игру</button>
         </div>
@@ -256,7 +254,7 @@
 
         let gameState = {
             mode: 'classic',
-            category: 'all',
+            category: 'все',
             questions: [],
             currentIndex: 0,
             score: 0,
@@ -307,7 +305,7 @@
 
         function startGame() {
             let questions = MENU_DATA.questions;
-            if (gameState.category !== 'all') {
+            if (gameState.category !== 'все') {
                 questions = questions.filter(q => q.category === gameState.category);
             }
             questions = shuffleArray(questions);
