@@ -185,7 +185,7 @@
             </div>
             <h3 style="margin: 20px 0 15px;">Категория (опционально):</h3>
             <div class="category-selector" id="category-selector">
-                <div class="category-chip selected" data-category="все" onclick="selectCategory(this)">🍽 Все блюда</div>
+                <div class="category-chip selected" data-category="все">🍽 Все блюда</div>
             </div>
             <button class="btn btn-primary" onclick="startGame()">Начать игру</button>
         </div>
@@ -431,6 +431,12 @@
             initCategories();
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('start-screen').classList.remove('hidden');
+            
+            // Добавляем обработчик для кнопки "Все блюда"
+            const allDishesBtn = document.querySelector('.category-chip[data-category="все"]');
+            if (allDishesBtn) {
+                allDishesBtn.onclick = () => selectCategory(allDishesBtn);
+            }
         };
     </script>
 </body>
